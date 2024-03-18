@@ -6,6 +6,7 @@
 #include <AsyncTCP.h>
 #include "SPIFFS.h"
 #include <ESPAsyncWebServer.h>
+#include <config.hpp>
 
 class FingerPrint {
   private:
@@ -20,8 +21,8 @@ class FingerPrint {
   public:
     FingerPrint(uint8_t serialPortNo);
     void connect();
-    void notFound(AsyncWebServerRequest *request);
-    void showNotAllowed();
     uint8_t getFingerprintID();
+    void showNotAllowed();
     uint8_t enroll(uint8_t id);
+    void listen();
 };

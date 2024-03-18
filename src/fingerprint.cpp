@@ -36,10 +36,23 @@ void FingerPrint::connect() {
   Serial.println(this->finger.packet_len);
   Serial.print(F("Baud rate: "));
   Serial.println(this->finger.baud_rate);
+
+  finger.getTemplateCount();
+
+  if (finger.templateCount == 0)
+  {
+    Serial.print("Sensor doesn't contain any fingerprint data. Please enroll some fingerprints.");
+  }
+  else
+  {
+    Serial.println("Waiting for valid finger...");
+    Serial.print("Sensor contains ");
+    Serial.print(finger.templateCount);
+    Serial.println(" templates");
+  }
 }
 
-uint8_t FingerPrint::enroll(uint8_t id)
-{
+uint8_t FingerPrint::enroll(uint8_t id) {
   int p = -1;
   Serial.print("Waiting for valid finger to enroll as #");
   Serial.println(id);
@@ -204,4 +217,130 @@ uint8_t FingerPrint::enroll(uint8_t id)
   }
 
   return true;
+}
+
+
+uint8_t FingerPrint::getFingerprintID()
+{
+  uint8_t p = this->finger.getImage();
+  switch (p)
+  {
+  case FINGERPRINT_OK:
+    Serial.println("Image taken");
+    break;
+  case FINGERPRINT_NOFINGER:
+    return p;
+  case FINGERPRINT_PACKETRECIEVEERR:
+    Serial.println("Communication error");
+    return p;
+  case FINGERPRINT_IMAGEFAIL:
+    Serial.println("Imaging error");
+    return p;
+  default:
+    Serial.println("Unknown error");
+    return p;
+  }
+
+  // OK success!
+
+  p = this->finger.image2Tz();
+  switch (p)
+  {
+  case FINGERPRINT_OK:
+    Serial.println("Image converted");
+    break;
+  case FINGERPRINT_IMAGEMESS:
+    Serial.println("Image too messy");
+    return p;
+  case FINGERPRINT_PACKETRECIEVEERR:
+    Serial.println("Communication error");
+    return p;
+  case FINGERPRINT_FEATUREFAIL:
+    Serial.println("Could not find fingerprint features");
+    return p;
+  case FINGERPRINT_INVALIDIMAGE:
+    Serial.println("Could not find fingerprint features");
+    return p;
+  default:
+    Serial.println("Unknown error");
+    return p;
+  }
+
+  // OK converted!
+  p = this->finger.fingerSearch();
+  if (p == FINGERPRINT_OK)
+  {
+    Serial.println("Found a print match!");
+    // found a match!
+    Serial.print("Found ID #");
+    Serial.print(this->finger.fingerID);
+    Serial.print(" with confidence of ");
+    Serial.println(this->finger.confidence);
+
+    return p;
+  }
+  else if (p == FINGERPRINT_PACKETRECIEVEERR)
+  {
+    Serial.println("Communication error");
+    return p;
+  }
+  else if (p == FINGERPRINT_NOTFOUND)
+  {
+    Serial.println("Did not find a match");
+    return p;
+  }
+  else
+  {
+    Serial.println("Unknown error");
+    return p;
+  }
+}
+
+void FingerPrint::listen() {
+  unsigned long currentMillis = millis();
+  // Close the door lock after 5 seconds
+  if (this->isOpen && currentMillis - this->previousOpenMillis >= Config::CLOSE_INTERVAL)
+  {
+    this->isOpen = false;
+    Serial.println("Closing the door lock!");
+    digitalWrite(Config::RELAY_PIN, HIGH);
+  }
+
+  // save the last time we read the fingerprint sensor
+  if (!this->isOpen && currentMillis - this->previousMillis >= Config::READ_INTERVAL)
+  {
+    this->previousMillis = currentMillis;
+    uint8_t result = getFingerprintID();
+    switch (result)
+    {
+    case FINGERPRINT_NOFINGER:
+      Serial.println("Scan your fingerprint");
+      // events.send("Scan your fingerprint", "noFingerprint", millis());
+      break;
+    case FINGERPRINT_OK:
+      Serial.println("Access Granted..opening door lock!");
+      // events.send("Access Granted", "accessGranted", millis());
+      this->previousOpenMillis = millis();
+      this->isOpen = true;
+      digitalWrite(Config::RELAY_PIN, LOW);
+      break;
+    case FINGERPRINT_NOTFOUND:
+      Serial.println("Access Denied");
+      // events.send("Access Denied", "accessDenied", millis());
+      // showNotAllowed();
+      delay(2000);
+      break;
+    case FINGERPRINT_PACKETRECIEVEERR:
+    case FINGERPRINT_IMAGEFAIL:
+    case FINGERPRINT_IMAGEMESS:
+    case FINGERPRINT_FEATUREFAIL:
+    case FINGERPRINT_INVALIDIMAGE:
+      Serial.println("Error in Fingerprint Scan!");
+      // events.send("Unknown Error", "unknownError", millis());
+      break;
+    default:
+      Serial.println("Unknown Error!");
+      break;
+    }
+  }
 }
