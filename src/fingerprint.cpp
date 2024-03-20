@@ -1,22 +1,19 @@
 #include <fingerprint.hpp>
 
-FingerPrint::FingerPrint(uint8_t serialPortNo) 
-  : server(80), events("/events"), serialPort(serialPortNo), finger(&serialPort) {
+FingerPrint::FingerPrint(uint8_t serialPortNo)
+    : server(80), events("/events"), serialPort(serialPortNo),
+      finger(&serialPort) {
   return;
 }
 
 void FingerPrint::connect() {
   this->finger.begin(57600);
 
-  if (this->finger.verifyPassword())
-  {
+  if (this->finger.verifyPassword()) {
     Serial.println("Found fingerprint sensor!");
-  }
-  else
-  {
+  } else {
     Serial.println("Did not find fingerprint sensor :(");
-    while (1)
-    {
+    while (1) {
       delay(1);
     }
   }
@@ -39,12 +36,10 @@ void FingerPrint::connect() {
 
   finger.getTemplateCount();
 
-  if (finger.templateCount == 0)
-  {
-    Serial.print("Sensor doesn't contain any fingerprint data. Please enroll some fingerprints.");
-  }
-  else
-  {
+  if (finger.templateCount == 0) {
+    Serial.print("Sensor doesn't contain any fingerprint data. Please enroll "
+                 "some fingerprints.");
+  } else {
     Serial.println("Waiting for valid finger...");
     Serial.print("Sensor contains ");
     Serial.print(finger.templateCount);
@@ -56,11 +51,9 @@ uint8_t FingerPrint::enroll(uint8_t id) {
   int p = -1;
   Serial.print("Waiting for valid finger to enroll as #");
   Serial.println(id);
-  while (p != FINGERPRINT_OK)
-  {
+  while (p != FINGERPRINT_OK) {
     p = this->finger.getImage();
-    switch (p)
-    {
+    switch (p) {
     case FINGERPRINT_OK:
       Serial.println("Image taken");
       break;
@@ -82,8 +75,7 @@ uint8_t FingerPrint::enroll(uint8_t id) {
   // OK success!
 
   p = this->finger.image2Tz(1);
-  switch (p)
-  {
+  switch (p) {
   case FINGERPRINT_OK:
     Serial.println("Image converted");
     break;
@@ -107,19 +99,16 @@ uint8_t FingerPrint::enroll(uint8_t id) {
   Serial.println("Remove finger");
   delay(2000);
   p = 0;
-  while (p != FINGERPRINT_NOFINGER)
-  {
+  while (p != FINGERPRINT_NOFINGER) {
     p = this->finger.getImage();
   }
   Serial.print("ID ");
   Serial.println(id);
   p = -1;
   Serial.println("Place same finger again");
-  while (p != FINGERPRINT_OK)
-  {
+  while (p != FINGERPRINT_OK) {
     p = this->finger.getImage();
-    switch (p)
-    {
+    switch (p) {
     case FINGERPRINT_OK:
       Serial.println("Image taken");
       break;
@@ -141,8 +130,7 @@ uint8_t FingerPrint::enroll(uint8_t id) {
   // OK success!
 
   p = this->finger.image2Tz(2);
-  switch (p)
-  {
+  switch (p) {
   case FINGERPRINT_OK:
     Serial.println("Image converted");
     break;
@@ -168,22 +156,15 @@ uint8_t FingerPrint::enroll(uint8_t id) {
   Serial.println(id);
 
   p = this->finger.createModel();
-  if (p == FINGERPRINT_OK)
-  {
+  if (p == FINGERPRINT_OK) {
     Serial.println("Prints matched!");
-  }
-  else if (p == FINGERPRINT_PACKETRECIEVEERR)
-  {
+  } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
     Serial.println("Communication error");
     return p;
-  }
-  else if (p == FINGERPRINT_ENROLLMISMATCH)
-  {
+  } else if (p == FINGERPRINT_ENROLLMISMATCH) {
     Serial.println("Fingerprints did not match");
     return p;
-  }
-  else
-  {
+  } else {
     Serial.println("Unknown error");
     return p;
   }
@@ -191,27 +172,18 @@ uint8_t FingerPrint::enroll(uint8_t id) {
   Serial.print("ID ");
   Serial.println(id);
   p = this->finger.storeModel(id);
-  if (p == FINGERPRINT_OK)
-  {
+  if (p == FINGERPRINT_OK) {
     Serial.println("Stored!");
-  }
-  else if (p == FINGERPRINT_PACKETRECIEVEERR)
-  {
+  } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
     Serial.println("Communication error");
     return p;
-  }
-  else if (p == FINGERPRINT_BADLOCATION)
-  {
+  } else if (p == FINGERPRINT_BADLOCATION) {
     Serial.println("Could not store in that location");
     return p;
-  }
-  else if (p == FINGERPRINT_FLASHERR)
-  {
+  } else if (p == FINGERPRINT_FLASHERR) {
     Serial.println("Error writing to flash");
     return p;
-  }
-  else
-  {
+  } else {
     Serial.println("Unknown error");
     return p;
   }
@@ -219,12 +191,9 @@ uint8_t FingerPrint::enroll(uint8_t id) {
   return true;
 }
 
-
-uint8_t FingerPrint::getFingerprintID()
-{
+uint8_t FingerPrint::getFingerprintID() {
   uint8_t p = this->finger.getImage();
-  switch (p)
-  {
+  switch (p) {
   case FINGERPRINT_OK:
     Serial.println("Image taken");
     break;
@@ -244,8 +213,7 @@ uint8_t FingerPrint::getFingerprintID()
   // OK success!
 
   p = this->finger.image2Tz();
-  switch (p)
-  {
+  switch (p) {
   case FINGERPRINT_OK:
     Serial.println("Image converted");
     break;
@@ -268,8 +236,7 @@ uint8_t FingerPrint::getFingerprintID()
 
   // OK converted!
   p = this->finger.fingerSearch();
-  if (p == FINGERPRINT_OK)
-  {
+  if (p == FINGERPRINT_OK) {
     Serial.println("Found a print match!");
     // found a match!
     Serial.print("Found ID #");
@@ -278,19 +245,13 @@ uint8_t FingerPrint::getFingerprintID()
     Serial.println(this->finger.confidence);
 
     return p;
-  }
-  else if (p == FINGERPRINT_PACKETRECIEVEERR)
-  {
+  } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
     Serial.println("Communication error");
     return p;
-  }
-  else if (p == FINGERPRINT_NOTFOUND)
-  {
+  } else if (p == FINGERPRINT_NOTFOUND) {
     Serial.println("Did not find a match");
     return p;
-  }
-  else
-  {
+  } else {
     Serial.println("Unknown error");
     return p;
   }
@@ -299,20 +260,19 @@ uint8_t FingerPrint::getFingerprintID()
 void FingerPrint::listen() {
   unsigned long currentMillis = millis();
   // Close the door lock after 5 seconds
-  if (this->isOpen && currentMillis - this->previousOpenMillis >= Config::CLOSE_INTERVAL)
-  {
+  if (this->isOpen &&
+      currentMillis - this->previousOpenMillis >= Config::CLOSE_INTERVAL) {
     this->isOpen = false;
     Serial.println("Closing the door lock!");
     digitalWrite(Config::RELAY_PIN, HIGH);
   }
 
   // save the last time we read the fingerprint sensor
-  if (!this->isOpen && currentMillis - this->previousMillis >= Config::READ_INTERVAL)
-  {
+  if (!this->isOpen &&
+      currentMillis - this->previousMillis >= Config::READ_INTERVAL) {
     this->previousMillis = currentMillis;
     uint8_t result = getFingerprintID();
-    switch (result)
-    {
+    switch (result) {
     case FINGERPRINT_NOFINGER:
       Serial.println("Scan your fingerprint");
       // events.send("Scan your fingerprint", "noFingerprint", millis());

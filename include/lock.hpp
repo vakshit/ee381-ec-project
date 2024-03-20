@@ -2,5 +2,4 @@
 
 class Lock {
 public:
-  
-}
+};

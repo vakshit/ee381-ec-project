@@ -10,9 +10,9 @@
 // const char *ssid = "realmeGT";
 // const char *password = "passowrd";
 
-// // AsyncWebserver runs on port 80 and the asyncwebsocket is initialize at this point also
-// AsyncWebServer server(80);
-// AsyncEventSource events("/events");
+// // AsyncWebserver runs on port 80 and the asyncwebsocket is initialize at
+// this point also AsyncWebServer server(80); AsyncEventSource
+// events("/events");
 
 // HardwareSerial serialPort(2); // use UART2
 // Adafruit_Fingerprint finger = Adafruit_Fingerprint(&serialPort);
@@ -70,8 +70,9 @@
 //   events.onConnect([](AsyncEventSourceClient *client){
 //     if (client->lastId())
 //     {
-//       Serial.printf("Client reconnected! Last message ID that it gat is: %u\n", client->lastId());
-//     } 
+//       Serial.printf("Client reconnected! Last message ID that it gat is:
+//       %u\n", client->lastId());
+//     }
 //   });
 
 //   // attach AsyncEventSource
@@ -80,7 +81,7 @@
 //   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
 //     {
 //       Serial.println("Requesting index page...");
-//       request->send(SPIFFS, "/index.html", "text/html", false); 
+//       request->send(SPIFFS, "/index.html", "text/html", false);
 //     });
 //   server.serveStatic("/css", SPIFFS, "/css/");
 //   server.serveStatic("/js", SPIFFS, "/js/");
@@ -128,7 +129,8 @@
 
 //   if (finger.templateCount == 0)
 //   {
-//     Serial.print("Sensor doesn't contain any fingerprint data. Please run the 'enroll' code to enroll fingerprints.");
+//     Serial.print("Sensor doesn't contain any fingerprint data. Please run the
+//     'enroll' code to enroll fingerprints.");
 //   }
 //   else
 //   {
@@ -278,4 +280,3 @@
 //   delay(1000);
 //   digitalWrite(buzzerPin, LOW);
 // }
-
