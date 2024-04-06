@@ -1,18 +1,19 @@
-// #include <Arduino.h>
-// #include <Adafruit_Fingerprint.h>
-// #include <WiFi.h>
-// #include <AsyncTCP.h>
 // #include "SPIFFS.h"
+// #include <Adafruit_Fingerprint.h>
+// #include <Arduino.h>
+// #include <AsyncTCP.h>
 // #include <ESPAsyncWebServer.h>
+// #include <WiFi.h>
 // #include <fingerprint.hpp>
 
 // // Change this to match your network SSID
 // const char *ssid = "realmeGT";
 // const char *password = "passowrd";
 
-// // AsyncWebserver runs on port 80 and the asyncwebsocket is initialize at
-// this point also AsyncWebServer server(80); AsyncEventSource
-// events("/events");
+// // AsyncWebserver runs on port 80 and the asyncwebsocket is initialize at this
+// // point also
+// AsyncWebServer server(80);
+// AsyncEventSource events("/events");
 
 // HardwareSerial serialPort(2); // use UART2
 // Adafruit_Fingerprint finger = Adafruit_Fingerprint(&serialPort);
@@ -22,8 +23,7 @@
 // void showNotAllowed();
 
 // // Function called when resource is not found on the server
-// void notFound(AsyncWebServerRequest *request)
-// {
+// void notFound(AsyncWebServerRequest *request) {
 //   request->send(404, "text/plain", "Not found");
 // }
 // // interval to read the fingerprint sensor
@@ -41,17 +41,16 @@
 // // Buzzer
 // const int buzzerPin = 22;
 
-// void setup()
-// {
+// void setup() {
 //   Serial.begin(9600);
-//   while (!Serial); // For Yun/Leo/Micro/Zero/...
+//   while (!Serial)
+//     ; // For Yun/Leo/Micro/Zero/...
 //   delay(100);
 
 //   // Connect to your wifi
 //   WiFi.mode(WIFI_STA);
 //   WiFi.begin(ssid, password);
-//   if (WiFi.waitForConnectResult() != WL_CONNECTED)
-//   {
+//   if (WiFi.waitForConnectResult() != WL_CONNECTED) {
 //     Serial.printf("WiFi Failed!\n");
 //     return;
 //   }
@@ -60,29 +59,26 @@
 //   Serial.println(WiFi.localIP());
 
 //   // Initialize SPIFFS
-//   if (!SPIFFS.begin(true))
-//   {
+//   if (!SPIFFS.begin(true)) {
 //     Serial.println("An Error has occurred while mounting SPIFFS");
 //     return;
 //   }
 
 //   // setup Server Sent Event
-//   events.onConnect([](AsyncEventSourceClient *client){
-//     if (client->lastId())
-//     {
-//       Serial.printf("Client reconnected! Last message ID that it gat is:
-//       %u\n", client->lastId());
+//   events.onConnect([](AsyncEventSourceClient *client) {
+//     if (client->lastId()) {
+//       Serial.printf("Client reconnected! Last message ID that it gat is: %u\n",
+//                     client->lastId());
 //     }
 //   });
 
 //   // attach AsyncEventSource
 //   server.addHandler(&events);
 
-//   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-//     {
-//       Serial.println("Requesting index page...");
-//       request->send(SPIFFS, "/index.html", "text/html", false);
-//     });
+//   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+//     Serial.println("Requesting index page...");
+//     request->send(SPIFFS, "/index.html", "text/html", false);
+//   });
 //   server.serveStatic("/css", SPIFFS, "/css/");
 //   server.serveStatic("/js", SPIFFS, "/js/");
 
@@ -96,13 +92,10 @@
 //   finger.begin(57600);
 //   delay(5);
 //   while (1) {
-//     if (finger.verifyPassword())
-//     {
+//     if (finger.verifyPassword()) {
 //       Serial.println("Found fingerprint sensor!");
 //       break;
-//     }
-//     else
-//     {
+//     } else {
 //       Serial.println("Did not find fingerprint sensor :(");
 //       delay(1000);
 //     }
@@ -127,13 +120,10 @@
 
 //   finger.getTemplateCount();
 
-//   if (finger.templateCount == 0)
-//   {
-//     Serial.print("Sensor doesn't contain any fingerprint data. Please run the
-//     'enroll' code to enroll fingerprints.");
-//   }
-//   else
-//   {
+//   if (finger.templateCount == 0) {
+//     Serial.print("Sensor doesn't contain any fingerprint data. Please run the "
+//                  "'enroll' code to enroll fingerprints.");
+//   } else {
 //     Serial.println("Waiting for valid finger...");
 //     Serial.print("Sensor contains ");
 //     Serial.print(finger.templateCount);
@@ -148,24 +138,20 @@
 //   pinMode(buzzerPin, OUTPUT);
 // }
 
-// void loop()
-// {
+// void loop() {
 //   unsigned long currentMillis = millis();
 //   // Close the door lock after 5 seconds
-//   if (isOpen && currentMillis - previousOpenMillis >= closeInterval)
-//   {
+//   if (isOpen && currentMillis - previousOpenMillis >= closeInterval) {
 //     isOpen = false;
 //     Serial.println("Closing the door lock!");
 //     digitalWrite(RELAY_PIN, HIGH);
 //   }
 
 //   // save the last time we read the fingerprint sensor
-//   if (!isOpen && currentMillis - previousMillis >= readInterval)
-//   {
+//   if (!isOpen && currentMillis - previousMillis >= readInterval) {
 //     previousMillis = currentMillis;
 //     uint8_t result = getFingerprintID();
-//     switch (result)
-//     {
+//     switch (result) {
 //     case FINGERPRINT_NOFINGER:
 //       Serial.println("Scan your fingerprint");
 //       events.send("Scan your fingerprint", "noFingerprint", millis());
@@ -198,11 +184,9 @@
 //   }
 // }
 
-// uint8_t getFingerprintID()
-// {
+// uint8_t getFingerprintID() {
 //   uint8_t p = finger.getImage();
-//   switch (p)
-//   {
+//   switch (p) {
 //   case FINGERPRINT_OK:
 //     Serial.println("Image taken");
 //     break;
@@ -222,8 +206,7 @@
 //   // OK success!
 
 //   p = finger.image2Tz();
-//   switch (p)
-//   {
+//   switch (p) {
 //   case FINGERPRINT_OK:
 //     Serial.println("Image converted");
 //     break;
@@ -246,8 +229,7 @@
 
 //   // OK converted!
 //   p = finger.fingerSearch();
-//   if (p == FINGERPRINT_OK)
-//   {
+//   if (p == FINGERPRINT_OK) {
 //     Serial.println("Found a print match!");
 //     // found a match!
 //     Serial.print("Found ID #");
@@ -256,26 +238,19 @@
 //     Serial.println(finger.confidence);
 
 //     return p;
-//   }
-//   else if (p == FINGERPRINT_PACKETRECIEVEERR)
-//   {
+//   } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
 //     Serial.println("Communication error");
 //     return p;
-//   }
-//   else if (p == FINGERPRINT_NOTFOUND)
-//   {
+//   } else if (p == FINGERPRINT_NOTFOUND) {
 //     Serial.println("Did not find a match");
 //     return p;
-//   }
-//   else
-//   {
+//   } else {
 //     Serial.println("Unknown error");
 //     return p;
 //   }
 // }
 
-// void showNotAllowed()
-// {
+// void showNotAllowed() {
 //   digitalWrite(buzzerPin, HIGH);
 //   delay(1000);
 //   digitalWrite(buzzerPin, LOW);

@@ -6,13 +6,20 @@ FingerPrint::FingerPrint(uint8_t serialPortNo)
   return;
 }
 
+FingerPrint::FingerPrint(uint8_t serialPortNo,
+                         std::shared_ptr<Display> &display)
+    : server(80), events("/events"), serialPort(serialPortNo),
+      finger(&serialPort), display(display) {
+  return;
+}
+
 void FingerPrint::connect() {
   this->finger.begin(57600);
 
   if (this->finger.verifyPassword()) {
-    Serial.println("Found fingerprint sensor!");
+    this->display->text("Found fingerprint sensor!");
   } else {
-    Serial.println("Did not find fingerprint sensor :(");
+    this->display->text("Did not find fingerprint sensor :(");
     while (1) {
       delay(1);
     }
@@ -37,8 +44,9 @@ void FingerPrint::connect() {
   finger.getTemplateCount();
 
   if (finger.templateCount == 0) {
-    Serial.print("Sensor doesn't contain any fingerprint data. Please enroll "
-                 "some fingerprints.");
+    this->display->text(
+        "Sensor doesn't contain any fingerprint data. Please enroll "
+        "some fingerprints.");
   } else {
     Serial.println("Waiting for valid finger...");
     Serial.print("Sensor contains ");
@@ -49,8 +57,8 @@ void FingerPrint::connect() {
 
 uint8_t FingerPrint::enroll(uint8_t id) {
   int p = -1;
-  Serial.print("Waiting for valid finger to enroll as #");
-  Serial.println(id);
+  this->display->text("Waiting for valid finger to enroll as #");
+  this->display->text(String(id));
   while (p != FINGERPRINT_OK) {
     p = this->finger.getImage();
     switch (p) {
@@ -263,6 +271,7 @@ void FingerPrint::listen() {
   if (this->isOpen &&
       currentMillis - this->previousOpenMillis >= Config::CLOSE_INTERVAL) {
     this->isOpen = false;
+    this->display->text("Closing the door lock!");
     Serial.println("Closing the door lock!");
     digitalWrite(Config::RELAY_PIN, HIGH);
   }
@@ -275,10 +284,12 @@ void FingerPrint::listen() {
     switch (result) {
     case FINGERPRINT_NOFINGER:
       Serial.println("Scan your fingerprint");
+      this->display->text("Scan your fingerprint");
       // events.send("Scan your fingerprint", "noFingerprint", millis());
       break;
     case FINGERPRINT_OK:
       Serial.println("Access Granted..opening door lock!");
+      this->display->text("Access Granted..opening door lock!");
       // events.send("Access Granted", "accessGranted", millis());
       this->previousOpenMillis = millis();
       this->isOpen = true;
@@ -286,6 +297,7 @@ void FingerPrint::listen() {
       break;
     case FINGERPRINT_NOTFOUND:
       Serial.println("Access Denied");
+      this->display->text("Access Denied");
       // events.send("Access Denied", "accessDenied", millis());
       // showNotAllowed();
       delay(2000);
@@ -296,10 +308,12 @@ void FingerPrint::listen() {
     case FINGERPRINT_FEATUREFAIL:
     case FINGERPRINT_INVALIDIMAGE:
       Serial.println("Error in Fingerprint Scan!");
+      this->display->text("Error in Fingerprint Scan!");
       // events.send("Unknown Error", "unknownError", millis());
       break;
     default:
       Serial.println("Unknown Error!");
+      this->display->text("Unknown Error!");
       break;
     }
   }

@@ -7,6 +7,7 @@
 #include <ESPAsyncWebServer.h>
 #include <WiFi.h>
 #include <config.hpp>
+#include <display.hpp>
 
 class FingerPrint {
 private:
@@ -14,12 +15,14 @@ private:
   AsyncEventSource events;
   HardwareSerial serialPort;
   Adafruit_Fingerprint finger;
+  std::shared_ptr<Display> display;
   unsigned long previousMillis = 0;
   unsigned long previousOpenMillis = 0;
   bool isOpen = false;
 
 public:
   FingerPrint(uint8_t serialPortNo);
+  FingerPrint(uint8_t serialPortNo, std::shared_ptr<Display> &display);
   void connect();
   uint8_t getFingerprintID();
   void showNotAllowed();
