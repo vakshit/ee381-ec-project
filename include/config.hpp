@@ -14,4 +14,5 @@ public:
   static const uint16_t port = 80;
   static const char *events;
   static const char *notFound;
+  static const char *adminPassword;
 };
