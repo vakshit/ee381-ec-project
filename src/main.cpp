@@ -21,6 +21,7 @@ Keypad keypad = Keypad(makeKeymap(keyMap), rowPins, colPins, ROWS, COLS);
 const char *Config::ssid = "Akshit-DLINK";
 const char *Config::password = "1q2w3e4r5t";
 const char *Config::adminPassword = "2245";
+const char *Config::fingerPrintPassword = "1234";
 const char *Config::events = "/events";
 
 std::shared_ptr<Display> display = std::make_shared<Display>();
@@ -36,13 +37,12 @@ void setup() {
     ;
   delay(100);
   display->init();
-  display->text("Adafruit Fingerprint sensor enrollment");
   finger.connect();
   // server.listen();
 
   // initialize Relay digital pin as an output.
   pinMode(Config::RELAY_PIN, OUTPUT);
-  digitalWrite(Config::RELAY_PIN, HIGH);
+  digitalWrite(Config::RELAY_PIN, LOW);
 
   // configure buzzer and led pin
   pinMode(Config::BUZZER_PIN, OUTPUT);
@@ -51,17 +51,22 @@ void setup() {
 void loop() // run over and over again
 {
   char key = keypad.getKey();
-  if (key && key == 'A') {
-    Serial.println(key);
-    display->text("Type Admin Password");
-    typedPassword.clear();
-    mode = 2;
+  if (key) {
+    if (key == 'A') {
+      display->text("Type Admin Password");
+      typedPassword.clear();
+      mode = 2;
+    } else if (key == 'B') {
+      display->text("Type FingerPrint Password");
+      typedPassword.clear();
+      mode = 3;
+    }
   }
   if (mode == 0) {
     finger.listen();
   } else if (mode == 1) {
     display->text("Ready to enroll a fingerprint!");
-    display->text("Please type in the ID # (from 1 to 127) you want to save"
+    display->text("Please type in the ID # (from 1 to 127) you want to save "
                   "this finger as...");
     std::string idString = "";
     while (true) {
@@ -101,6 +106,28 @@ void loop() // run over and over again
           display->text(std::string(typedPassword.size(), '*').c_str());
           if (typedPassword == Config::adminPassword) {
             mode = 1;
+            break;
+          }
+        }
+      }
+    }
+  } else if (mode == 3) {
+    while (true) {
+      key = keypad.getKey();
+      if (key) {
+        if (key == 'D') {
+          mode = 0;
+          break;
+        } else if ((key - '0') >= 0 && (key - '0') <= 9) {
+          typedPassword += key;
+          display->text(std::string(typedPassword.size(), '*').c_str());
+          if (typedPassword == Config::fingerPrintPassword) {
+            mode = 0;
+            display->text("Access Granted! Opening Door lock...");
+            digitalWrite(Config::RELAY_PIN, HIGH);
+            delay(5000);
+            display->text("Closing Door lock...");
+            digitalWrite(Config::RELAY_PIN, LOW);
             break;
           }
         }

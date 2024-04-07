@@ -15,4 +15,5 @@ public:
   static const char *events;
   static const char *notFound;
   static const char *adminPassword;
+  static const char *fingerPrintPassword;
 };

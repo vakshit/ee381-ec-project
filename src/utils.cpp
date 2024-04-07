@@ -9,3 +9,14 @@ uint8_t Utils::readnumber(void) {
   }
   return num;
 };
+
+void Utils::flashNotAllowed() {
+  for (int i = 0; i < 5; i++) {
+    digitalWrite(Config::RELAY_PIN, HIGH);
+    delay(100);
+    digitalWrite(Config::RELAY_PIN, LOW);
+    delay(100);
+  }
+}
+
+void Utils::checkPassword(const char *password) {}

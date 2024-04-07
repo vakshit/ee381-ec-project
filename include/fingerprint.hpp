@@ -8,6 +8,7 @@
 #include <WiFi.h>
 #include <config.hpp>
 #include <display.hpp>
+#include <utils.hpp>
 
 class FingerPrint {
 private:

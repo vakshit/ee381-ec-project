@@ -273,7 +273,7 @@ void FingerPrint::listen() {
     this->isOpen = false;
     this->display->text("Closing the door lock!");
     Serial.println("Closing the door lock!");
-    digitalWrite(Config::RELAY_PIN, HIGH);
+    digitalWrite(Config::RELAY_PIN, LOW);
   }
 
   // save the last time we read the fingerprint sensor
@@ -293,13 +293,13 @@ void FingerPrint::listen() {
       // events.send("Access Granted", "accessGranted", millis());
       this->previousOpenMillis = millis();
       this->isOpen = true;
-      digitalWrite(Config::RELAY_PIN, LOW);
+      digitalWrite(Config::RELAY_PIN, HIGH);
       break;
     case FINGERPRINT_NOTFOUND:
       Serial.println("Access Denied");
       this->display->text("Access Denied");
       // events.send("Access Denied", "accessDenied", millis());
-      // showNotAllowed();
+      Utils::flashNotAllowed();
       delay(2000);
       break;
     case FINGERPRINT_PACKETRECIEVEERR:
