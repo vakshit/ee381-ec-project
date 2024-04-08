@@ -25,8 +25,9 @@ const char *Config::fingerPrintPassword = "1234";
 const char *Config::events = "/events";
 
 std::shared_ptr<Display> display = std::make_shared<Display>();
-FingerPrint finger(Config::SERIAL_PORT_NO, display);
-// LockServer server(Config::port, Config::events);
+std::shared_ptr<LockServer> server =
+    std::make_shared<LockServer>(Config::port, Config::events, display);
+FingerPrint finger(Config::SERIAL_PORT_NO, display, server);
 
 int mode = 0; // 0 for normal mode, 1 for enroll mode, 2 for typing mode
 std::string typedPassword = "";
@@ -38,7 +39,8 @@ void setup() {
   delay(100);
   display->init();
   finger.connect();
-  // server.listen();
+  server->init();
+  server->listen();
 
   // initialize Relay digital pin as an output.
   pinMode(Config::RELAY_PIN, OUTPUT);
@@ -54,10 +56,12 @@ void loop() // run over and over again
   if (key) {
     if (key == 'A') {
       display->text("Type Admin Password");
+      server->events.send("Enter Admin Password", "adminMode", millis());
       typedPassword.clear();
       mode = 2;
     } else if (key == 'B') {
       display->text("Type FingerPrint Password");
+      server->events.send("Enter Password", "passwordMode", millis());
       typedPassword.clear();
       mode = 3;
     }
@@ -68,6 +72,7 @@ void loop() // run over and over again
     display->text("Ready to enroll a fingerprint!");
     display->text("Please type in the ID # (from 1 to 127) you want to save "
                   "this finger as...");
+    server->events.send("Add a Fingerprint", "addFingerprint", millis());
     std::string idString = "";
     while (true) {
       key = keypad.getKey();
@@ -124,10 +129,12 @@ void loop() // run over and over again
           if (typedPassword == Config::fingerPrintPassword) {
             mode = 0;
             display->text("Access Granted! Opening Door lock...");
-            digitalWrite(Config::RELAY_PIN, HIGH);
+            server->events.send("Access Granted", "accessGranted", millis());
+            digitalWrite(Config::RELAY_PIN, LOW);
             delay(5000);
             display->text("Closing Door lock...");
-            digitalWrite(Config::RELAY_PIN, LOW);
+            digitalWrite(Config::RELAY_PIN, HIGH);
+            delay(2000);
             break;
           }
         }

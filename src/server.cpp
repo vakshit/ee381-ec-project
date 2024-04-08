@@ -1,7 +1,8 @@
 #include <server.hpp>
 
-LockServer::LockServer(uint32_t port, const char *events)
-    : server(port), events(events) {
+LockServer::LockServer(uint32_t port, const char *events,
+                       std::shared_ptr<Display> &display)
+    : server(port), events(events), display(display) {
   return;
 }
 
@@ -32,4 +33,22 @@ void LockServer::listen() {
 
   // Start server
   server.begin();
+}
+
+void LockServer::init() {
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(Config::ssid, Config::password);
+  if (WiFi.waitForConnectResult() != WL_CONNECTED) {
+    display->text("WiFi Failed!\n");
+    return;
+  }
+  display->text("IP Address: " + WiFi.localIP().toString());
+
+  // Initialize SPIFFS
+  if (!SPIFFS.begin(true)) {
+    Serial.println("An Error has occurred while mounting SPIFFS");
+    display->text("An Error has occurred while mounting SPIFFS");
+    return;
+  }
 }

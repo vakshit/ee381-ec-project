@@ -8,22 +8,23 @@
 #include <WiFi.h>
 #include <config.hpp>
 #include <display.hpp>
+#include <server.hpp>
 #include <utils.hpp>
 
 class FingerPrint {
 private:
-  AsyncWebServer server;
-  AsyncEventSource events;
   HardwareSerial serialPort;
   Adafruit_Fingerprint finger;
   std::shared_ptr<Display> display;
+  std::shared_ptr<LockServer> server;
   unsigned long previousMillis = 0;
   unsigned long previousOpenMillis = 0;
   bool isOpen = false;
 
 public:
   FingerPrint(uint8_t serialPortNo);
-  FingerPrint(uint8_t serialPortNo, std::shared_ptr<Display> &display);
+  FingerPrint(uint8_t serialPortNo, std::shared_ptr<Display> &display,
+              std::shared_ptr<LockServer> &server);
   void connect();
   uint8_t getFingerprintID();
   void showNotAllowed();

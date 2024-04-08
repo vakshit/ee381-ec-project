@@ -37,6 +37,30 @@ if (!!window.EventSource) {
     false
   );
   source.addEventListener(
+    "adminMode",
+    function (e) {
+      console.log(e.data);
+      showMessage("message-info", e.data);
+    },
+    false
+  );
+  source.addEventListener(
+    "passwordMode",
+    function (e) {
+      console.log(e.data);
+      showMessage("message-info", e.data);
+    },
+    false
+  );
+  source.addEventListener(
+    "addFingerprint",
+    function (e) {
+      console.log(e.data);
+      showMessage("message-info", e.data);
+    },
+    false
+  );
+  source.addEventListener(
     "accessGranted",
     function (e) {
       console.log(e.data);

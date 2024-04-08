@@ -12,9 +12,9 @@ uint8_t Utils::readnumber(void) {
 
 void Utils::flashNotAllowed() {
   for (int i = 0; i < 5; i++) {
-    digitalWrite(Config::RELAY_PIN, HIGH);
+    digitalWrite(Config::BUZZER_PIN, HIGH);
     delay(100);
-    digitalWrite(Config::RELAY_PIN, LOW);
+    digitalWrite(Config::BUZZER_PIN, LOW);
     delay(100);
   }
 }
